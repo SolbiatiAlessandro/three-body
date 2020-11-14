@@ -7,23 +7,19 @@
 
 (declare render)
 (defrecord Body [id x y vx vy ax ay out])
+(def start-time 1000)
 (def min-boundary 0)
 (def max-boundary 100)
-(def initial-offset 3)
-(defn rand-x [] (+ (+ initial-offset min-boundary)  (rand-int (- max-boundary (* 2 initial-offset)))))
+(def offset 5)
+(defn rand-x [] (+ (+ offset min-boundary)  (rand-int (- max-boundary (* 2 offset)))))
 (defn body [id] (Body. id (rand-x) (rand-x) 0 0 0 0 false))
 (defn init-bodies [n] (map (fn [id] (body (+ 1 id))) (range n)))
 (def comb [[1 2] [0 2] [0 1]])
-(def prev-ts (atom 0))
+(def prev-ts (atom start-time))
 (def bodies (atom (init-bodies 3)))
 
-;; PHYSICS
-
-(def adjusted-G 0.05)
-
-;; https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
-;; http://nbabel.org/equations
-;; https://physics.stackexchange.com/a/404826/279554
+;; PHYSICS, quick implementaion of http://nbabel.org/equations
+(def adjusted-G 0.003)
 
 (defn g-force [first_body second_body]
   "Compute gravitational attraction between two bodies
@@ -32,6 +28,7 @@
         dx (- (:x first_body) (:x second_body))  
         angle (js/Math.atan2 dy dx)
         distance (js/Math.sqrt (+ (* dy dy) (* dx dx)))
+        distance (max distance offset)
         magnitude (/ adjusted-G (* distance distance))]
     [(* -1 magnitude (js/Math.cos angle)) (* magnitude -1 (js/Math.sin angle))]))
 
@@ -71,19 +68,35 @@
     (map-indexed body-integrator bodies-i1)) 
   )
 
+(defn wall-bounce 
+  ([body axis velocity] 
+   (let [first-wall (+ min-boundary offset )
+         first-wall-hit (>= first-wall (get body axis))
+         second-wall (- max-boundary offset)
+         second-wall-hit (<= second-wall (get body axis))]
+     (cond
+       first-wall-hit (assoc body velocity (* -1 (get body velocity)) axis first-wall)
+       second-wall-hit (assoc body velocity (* -1 (get body velocity)) axis second-wall)
+       :else body)))
+  ([bodies]
+   (let [
+         bodies (map (fn [body] (wall-bounce body :x :vx)) bodies)
+         bodies (map (fn [body] (wall-bounce body :y :vy)) bodies)
+         ] bodies)
+   ))
+
 (defn step-physics-simulation [bodies dt]
   (let [bodies-i (step-accelleration bodies)
         bodies-i1 (step-position bodies-i dt)
         bodies-i1 (step-accelleration bodies-i1)
-        bodies (step-velocities bodies-i bodies-i1 dt)]
+        bodies (step-velocities bodies-i bodies-i1 dt)
+        bodies (wall-bounce bodies)
+        ]
     (render bodies)
     (if debug (js/console.log dt))
     bodies))
 
 ;; RENDERING
-
-(defn out-of-boundaries [bodies]
-  (filter (fn [body] (and (>= min-boundary (:x body)) (<= (:y body) max-boundary))) bodies))
 
 (defn render [bodies] 
   (doseq [body bodies] 
@@ -94,10 +107,12 @@
 (defn main [ts]
   (do
    (js/window.requestAnimationFrame main)  
-   (swap! bodies step-physics-simulation (- ts @prev-ts))
-   ;(swap! bodies out-of-boundaries)
-   (swap! prev-ts (fn [_ ts] ts) ts)
+   (if (> ts start-time)
+     (do 
+       (swap! bodies step-physics-simulation (- ts @prev-ts))
+       (swap! prev-ts (fn [_ ts] ts) ts)))
    (if debug (js/console.log (clj->js bodies)))
    ))
 
+(render @bodies)
 (main 0)
