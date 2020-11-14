@@ -1,19 +1,22 @@
 (ns three-body.core
     (:require ))
 
+(def debug false)
+
 ;; DATASTRUCTURES
 
+(declare render)
 (defrecord Body [id x y vx vy ax ay])
 (defn rand-x [] (+ 3 (rand-int 94)))
 (defn body [id] (Body. id (rand-x) (rand-x) 0 0 0 0))
 (defn init-bodies [n] (map (fn [id] (body (+ 1 id))) (range n)))
 (def comb [[1 2] [0 2] [0 1]])
+(def prev-ts (atom 0))
 (def bodies (atom (init-bodies 3)))
-(declare render)
 
 ;; PHYSICS
 
-(def G 0.00000000006674)
+(def adjusted-G 0.006674)
 
 ;; https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
 ;; http://nbabel.org/equations
@@ -26,13 +29,13 @@
         dx (- (:x first_body) (:x second_body))  
         angle (js/Math.atan2 dy dx)
         distance (js/Math.sqrt (+ (* dy dy) (* dx dx)))
-        magnitude (/ G (* distance distance))]
+        magnitude (/ adjusted-G (* distance distance))]
     [(* magnitude (js/Math.cos angle)) (* magnitude (js/Math.sin angle))]))
 
 (defn vector-sum [vectors]
   (reduce (fn [acc x] [(+ (first acc) (first x)) (+ (second acc) (second x))]) vectors))
 
-(defn g-accell 
+(defn step-accelleration
  ([i bodies] 
   "Compute accelleration for i-th body"
   (let [acc-components (map 
@@ -40,14 +43,25 @@
                            (nth comb i))]
     (vector-sum acc-components))) 
  ([bodies]
-  "Return bodies with updated accellerations"
-   (map-indexed (fn [i body] (let [[ax ay] (g-accell i bodies)]
+   (map-indexed (fn [i body] (let [[ax ay] (step-accelleration i bodies)]
                   (assoc body :ax ax :ay ay)))
                 bodies )))
 
-(defn step-physics-simulation [bodies ts]
-  (let [bodies  (g-accell bodies)]
+(defn step-position [bodies dt]
+  "Integrate position with velocity verlet method 
+  ref: https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet"
+  (let [integrator-1d (fn [x v a] (+ x (* v dt) (* 0.5 a (* dt dt))))
+        body-integrator (fn [body] (assoc body 
+                                         :x (integrator-1d (:x body) (:vx body) (:ax body))
+                                         :y (integrator-1d (:y body) (:vy body) (:ay body))
+                                         ))]
+    (map body-integrator bodies)))
+
+(defn step-physics-simulation [bodies dt]
+  (let [bodies(step-accelleration bodies)
+        bodies (step-position bodies dt)]
     (render bodies)
+    (if debug (js/console.log dt))
     bodies))
 
 ;; RENDERING
@@ -61,8 +75,9 @@
 (defn main [ts]
   (do
    (js/window.requestAnimationFrame main)  
-   (swap! bodies step-physics-simulation ts)
-   ;; (js/console.log (clj->js bodies))
+   (swap! bodies step-physics-simulation (- ts @prev-ts))
+   (swap! prev-ts (fn [_ ts] ts) ts)
+   (if debug (js/console.log (clj->js bodies)))
    ))
 
 (main 0)
