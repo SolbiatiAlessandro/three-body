@@ -10,7 +10,7 @@
 (def start-time 1000)
 (def min-boundary 0)
 (def max-boundary 100)
-(def offset 5)
+(def offset 10)
 (defn rand-x [] (+ (+ offset min-boundary)  (rand-int (- max-boundary (* 2 offset)))))
 (defn body [id] (Body. id (rand-x) (rand-x) 0 0 0 0 false))
 (defn init-bodies [n] (map (fn [id] (body (+ 1 id))) (range n)))
@@ -18,8 +18,15 @@
 (def prev-ts (atom start-time))
 (def bodies (atom (init-bodies 3)))
 
-;; PHYSICS, quick implementaion of http://nbabel.org/equations
-(def adjusted-G 0.003)
+;; PHYSICS
+;; Dynamical simulation of three bodies of equal mass
+;; subjected to gravitational attraction in absence of friction.
+;; The simulation tries to keep constant the overall system's energy
+;; to avoid degenerates states.
+;;
+;; ref: http://nbabel.org/equations
+
+(def adjusted-G 0.005)
 
 (defn g-force [first_body second_body]
   "Compute gravitational attraction between two bodies

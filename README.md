@@ -1,10 +1,11 @@
 # three-body
 
-FIXME: Write a one-line description of your library/project.
+Dynamical simulation of three bodies of equal mass
+subjected to gravitational attraction in absence of friction.
+The simulation tries to keep constant the overall system's energy
+to avoid degenerates states.
 
-## Overview
-
-FIXME: Write a paragraph about the library/project and highlight its goals.
+ref: http://nbabel.org/equations
 
 ## Setup
 
