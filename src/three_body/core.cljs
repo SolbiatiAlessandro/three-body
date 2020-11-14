@@ -57,9 +57,21 @@
                                          ))]
     (map body-integrator bodies)))
 
+(defn step-velocities [bodies-i bodies-i1 dt]
+  "Integrate velocities with velocity verlet method 
+  ref: https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet"
+  (let [integrator-1d (fn [v a] (+ v (* 0.5 a dt)))
+        body-integrator (fn [body] (assoc body 
+                                         :vx (integrator-1d (:vx body) (:ax body))
+                                         :vy (integrator-1d (:vy body) (:ay body))
+                                         ))]
+    (map body-integrator bodies)) 
+  )
 (defn step-physics-simulation [bodies dt]
-  (let [bodies(step-accelleration bodies)
-        bodies (step-position bodies dt)]
+  (let [bodies-i (step-accelleration bodies)
+        bodies-i1 (step-position bodies-i dt)
+        bodies-i1 (step-accelleration bodies-i1)
+        ]
     (render bodies)
     (if debug (js/console.log dt))
     bodies))
