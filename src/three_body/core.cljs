@@ -3,6 +3,7 @@
 
 (def debug false)
 
+
 ;; DATASTRUCTURES
 
 (declare render)
@@ -10,6 +11,7 @@
 (def start-time 1000)
 (def min-boundary 0)
 (def max-boundary 100)
+(def max-time-step 50)
 (def offset 10)
 (defn rand-x [] (+ (+ offset min-boundary)  (rand-int (- max-boundary (* 2 offset)))))
 (defn body [id] (Body. id (rand-x) (rand-x) 0 0 0 0 false))
@@ -93,7 +95,9 @@
    ))
 
 (defn step-physics-simulation [bodies dt]
-  (let [bodies-i (step-accelleration bodies)
+  (let [
+        dt (min dt max-time-step) ;; prevent velocity explosion for large lagged timesteps
+        bodies-i (step-accelleration bodies)
         bodies-i1 (step-position bodies-i dt)
         bodies-i1 (step-accelleration bodies-i1)
         bodies (step-velocities bodies-i bodies-i1 dt)
