@@ -1,11 +1,16 @@
 # three-body
 
-Dynamical simulation of three bodies of equal mass
-subjected to gravitational attraction in absence of friction.
+Browser based physical simulation of three bodies of equal mass
+subjected to gravitational attraction in absence of friction written in [ClojureScript](https://clojurescript.org/).
+
 The simulation tries to keep constant the overall system's energy
 to avoid degenerates states.
 
 ref: http://nbabel.org/equations
+
+**[https://youtube.com/6D9ARLVxytM](https://www.youtube.com/watch?v=6D9ARLVxytM)**  
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/6D9ARLVxytM/0.jpg)](https://www.youtube.com/watch?v=6D9ARLVxytM)
 
 ## Setup
 
