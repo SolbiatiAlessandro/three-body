@@ -1,8 +1,26 @@
 (ns three-body.core
-    (:require ))
+  "Animates three html elements simulating the Three Body Problems.
+  The three elements need to look like this:
+
+	  <div id='body1'></div>
+	  <div id='body2'></div>
+	  <div id='body3'></div>
+
+  You can additionally add a toggle element to play/stop the simulation
+
+	  <div id='three-body-animation' state='on'></div>
+
+  How you might want you use it is to run
+
+      `lein cljsbuild once min`
+
+  And serve the generated files in `js/compiled`
+
+  ref. PHYSICS for more informations on the simulation
+  "
+  (:require ))
 
 (def debug false)
-
 
 ;; DATASTRUCTURES
 
@@ -115,10 +133,15 @@
       (set! (.-bottom style) (str (:y body) "%"))
       (set! (.-left style) (str (:x body) "%")))))
 
+(defn three-body-animation-on []
+  (= "on"
+     (.getAttribute 
+      (.getElementById js/document "three-body-animation") "state")))
+
 (defn main [ts]
   (do
    (js/window.requestAnimationFrame main)  
-   (if (> ts start-time)
+   (if (and (three-body-animation-on) (> ts start-time))
      (do 
        (swap! bodies step-physics-simulation (- ts @prev-ts))
        (swap! prev-ts (fn [_ ts] ts) ts)))
