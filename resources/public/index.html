@@ -21,6 +21,12 @@
 	  <div id="body2" style="background-color:grey" class="circle"></div>
 	  <div id="body3" style="background-color:grey" class="circle"></div>
     </div>
+	<script>
+	  const threeBodyAnimationOn = function () {
+		const state = document.getElementById("three-body-animation").getAttribute("state");
+		return state === "on";
+	  }
+	</script>
     <script src="js/compiled/three_body.js" type="text/javascript"></script>
   </body>
 </html>

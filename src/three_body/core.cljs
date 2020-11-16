@@ -6,9 +6,9 @@
 	  <div id='body2'></div>
 	  <div id='body3'></div>
 
-  You can additionally add a toggle element to play/stop the simulation
-
-	  <div id='three-body-animation' state='on'></div>
+  You should also implement a function `threeBodyAnimationOn` 
+  that returns true for the animation to run and false for the 
+  animation to freeze.
 
   How you might want you use it is to run
 
@@ -133,10 +133,7 @@
       (set! (.-bottom style) (str (:y body) "%"))
       (set! (.-left style) (str (:x body) "%")))))
 
-(defn three-body-animation-on []
-  (= "on"
-     (.getAttribute 
-      (.getElementById js/document "three-body-animation") "state")))
+(defn three-body-animation-on [] (js/threeBodyAnimationOn))
 
 (defn main [ts]
   (do

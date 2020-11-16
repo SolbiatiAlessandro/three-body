@@ -12,6 +12,28 @@ ref: http://nbabel.org/equations
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/6D9ARLVxytM/0.jpg)](https://www.youtube.com/watch?v=6D9ARLVxytM)
 
+## Usage
+
+Animates three html elements simulating the Three Body Problems.
+The three elements need to look like this:
+
+	<div id='body1'></div>
+	<div id='body2'></div>
+	<div id='body3'></div>
+
+You should also implement a function `threeBodyAnimationOn`
+that returns true for the animation to run and false for the
+animation to freeze.
+
+How you might want you use it is to run
+
+	`lein cljsbuild once min`
+
+And serve the generated files in `js/compiled`
+
+ref. PHYSICS for more informations on the simulation
+
+
 ## Setup
 
 To get an interactive development environment run:
