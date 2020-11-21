@@ -127,6 +127,10 @@
       )
     @stop-running-ts))
 
+;; if you read the code until here we would probably have a nice chat together
+;; so shoot me a DM at https://twitter.com/lessand_ro or mail at hello@lessand.ro 
+;; and tell me what you are building
+
 (defn step-physics-simulation [bodies dt]
   (let [
         ;; prevent velocity explosion for large lagged timesteps 
